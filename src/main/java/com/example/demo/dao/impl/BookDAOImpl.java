@@ -4,10 +4,11 @@ import com.example.demo.dao.BookDAO;
 import com.example.demo.entity.Book;
 import com.example.demo.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-@Service
+@Repository
 public class BookDAOImpl implements BookDAO {
 
     @Autowired
@@ -15,68 +16,36 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public List<Book> getAllBooks() {
-        try {
-            List<Book> books = bookRepository.findAll();
-            System.out.println("DAO - All Books: " + books);
-            return books;
-        } catch (Exception e) {
-            throw new RuntimeException("DAO Error fetching books: " + e.getMessage());
-        }
+        return bookRepository.findAll();
     }
 
     @Override
     public Book addBook(Book book) {
-        try {
-            Book saved = bookRepository.save(book);
-            System.out.println("DAO - Book Saved: " + saved);
-            return saved;
-        } catch (Exception e) {
-            throw new RuntimeException("DAO Error saving book: " + e.getMessage());
-        }
+        return bookRepository.save(book);
     }
 
     @Override
-    public List<Book> getBookByName(String title) {
-        try {
-            List<Book> book = bookRepository.findByTitle(title);
-            System.out.println("DAO - Book Found: " + book);
-            return book;
-        } catch (Exception e) {
-            throw new RuntimeException("DAO Error finding book: " + e.getMessage());
-        }
-    }
-
-    @Override
-    public String deleteBook(Integer id) {
-        try {
-            bookRepository.deleteById(id);
-            System.out.println("DAO - Book Deleted ID: " + id);
-            return "Book deleted from DAO";
-        } catch (Exception e) {
-            throw new RuntimeException("DAO Error deleting book: " + e.getMessage());
-        }
+    public Book getBookByName(String title) {
+        return bookRepository.findByTitle(title).stream().findFirst().orElse(null);
     }
 
     @Override
     public Book updateBook(Integer id, Book book) {
-        try {
-            Book existing = bookRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("Book not found in DAO"));
+        Book existing = bookRepository.findById(id).orElse(null);
+        if(existing == null) return null;
+        existing.setTitle(book.getTitle());
+        existing.setAuthor(book.getAuthor());
+        existing.setGenre(book.getGenre());
+        existing.setIsbn(book.getIsbn());
+        existing.setPublisher(book.getPublisher());
+        existing.setPublicationYear(book.getPublicationYear());
+        existing.setPrice(book.getPrice());
+        existing.setStockQuantity(book.getStockQuantity());
+        return bookRepository.save(existing);
+    }
 
-            existing.setTitle(book.getTitle());
-            existing.setAuthor(book.getAuthor());
-            existing.setGenre(book.getGenre());
-            existing.setIsbn(book.getIsbn());
-            existing.setPublisher(book.getPublisher());
-            existing.setPublicationYear(book.getPublicationYear());
-            existing.setPrice(book.getPrice());
-            existing.setStockQuantity(book.getStockQuantity());
-
-            Book updated = bookRepository.save(existing);
-            System.out.println("DAO - Book Updated: " + updated);
-            return updated;
-        } catch (Exception e) {
-            throw new RuntimeException("DAO Error updating book: " + e.getMessage());
-        }
+    @Override
+    public void deleteBook(Integer id) {
+        bookRepository.deleteById(id);
     }
 }
