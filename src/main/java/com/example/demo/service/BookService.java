@@ -7,6 +7,6 @@ public interface BookService {
     List<Book> getAllBooks();
     Book addBook(Book book);
     List<Book> getBookByName(String title);
-    Book updateBook(Integer id, Book book);
     String deleteBook(Integer id);
+    Book updateBook(Integer id, Book book);
 }
