@@ -1,45 +1,42 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "books")
+@Table(name = "Books")
 public class Book {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "book_id")
     private Integer bookId;
 
-    @Column(name = "title", nullable = false)
+    @NotBlank(message = "Title is required")
     private String title;
 
-    @Column(name = "author", nullable = false)
+    @NotBlank(message = "Author is required")
     private String author;
 
-    @Column(name = "genre")
     private String genre;
 
-    @Column(name = "isbn", unique = true)
+    @Size(min = 10, max = 20, message = "ISBN must be 10-20 characters")
     private String isbn;
 
-    @Column(name = "publisher")
     private String publisher;
 
-    @Column(name = "publication_year")
     private Integer publicationYear;
 
-    @Column(name = "price")
+    @Min(value = 1, message = "Price must be greater than 0")
     private Double price;
 
-    @Column(name = "stock_quantity")
+    @Min(value = 0, message = "Stock cannot be negative")
     private Integer stockQuantity;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     // Getters & Setters
+
     public Integer getBookId() { return bookId; }
     public void setBookId(Integer bookId) { this.bookId = bookId; }
 
@@ -53,7 +50,7 @@ public class Book {
     public void setGenre(String genre) { this.genre = genre; }
 
     public String getIsbn() { return isbn; }
-    public void setIsbn(String isbn) { this.isbn = isbn; }
+    public void setIsbn(String isbn) { this.genre = genre; }
 
     public String getPublisher() { return publisher; }
     public void setPublisher(String publisher) { this.publisher = publisher; }
@@ -68,5 +65,4 @@ public class Book {
     public void setStockQuantity(Integer stockQuantity) { this.stockQuantity = stockQuantity; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
