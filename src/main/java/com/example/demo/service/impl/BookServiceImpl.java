@@ -2,7 +2,6 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dao.BookDAO;
 import com.example.demo.entity.Book;
-import com.example.demo.repository.BookRepository;
 import com.example.demo.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,19 +13,16 @@ public class BookServiceImpl implements BookService {
     @Autowired
     private BookDAO bookDAO;
 
-    @Autowired
-    private BookRepository bookRepository; // ✅ repository ko service me access dene ke liye inject kiya
-
     @Override
     public List<Book> getAllBooks() {
-        List<Book> books = null;
+        List<Book> list = null;
         try {
-            books = bookDAO.getAllBooks();
-            System.out.println("Service: All books fetched successfully");
+            list = bookDAO.getAllBooks();
+            System.out.println("Service: All Books fetched");
         } catch (Exception e) {
-            throw new RuntimeException("Service error while fetching books: " + e.getMessage());
+            throw new RuntimeException("Error fetching books: " + e.getMessage());
         }
-        return books;
+        return list;
     }
 
     @Override
@@ -34,9 +30,9 @@ public class BookServiceImpl implements BookService {
         Book saved = null;
         try {
             saved = bookDAO.addBook(book);
-            System.out.println("Service: Book saved → " + saved);
+            System.out.println("Service: Book added → " + saved);
         } catch (Exception e) {
-            throw new RuntimeException("Service error while saving book: " + e.getMessage());
+            throw new RuntimeException("Error adding book: " + e.getMessage());
         }
         return saved;
     }
@@ -45,33 +41,32 @@ public class BookServiceImpl implements BookService {
     public List<Book> getBookByName(String title) {
         List<Book> books = null;
         try {
-            books = bookRepository.findByTitle(title); // ✅ repository method use kiya
+            books = bookDAO.getBookByName(title);
             System.out.println("Service: Books found → " + books);
         } catch (Exception e) {
-            throw new RuntimeException("Service error while finding book: " + e.getMessage());
+            throw new RuntimeException("Error finding book: " + e.getMessage());
         }
         return books;
     }
 
     @Override
-    public String deleteBook(Integer id) {
+    public void deleteBook(Integer id) {
         try {
             bookDAO.deleteBook(id);
-            System.out.println("Service: Book deleted → ID " + id);
+            System.out.println("Service: Deleted book id → " + id);
         } catch (Exception e) {
-            throw new RuntimeException("Service error while deleting book: " + e.getMessage());
+            throw new RuntimeException("Error deleting book: " + e.getMessage());
         }
-        return "Book deleted successfully";
     }
 
     @Override
-    public Book updateBook(Integer id, Book newData) {
+    public Book updateBook(Integer id, Book book) {
         Book updated = null;
         try {
-            updated = bookDAO.updateBook(id, newData);
+            updated = bookDAO.updateBook(id, book);
             System.out.println("Service: Book updated → " + updated);
         } catch (Exception e) {
-            throw new RuntimeException("Service error while updating book: " + e.getMessage());
+            throw new RuntimeException("Error updating book: " + e.getMessage());
         }
         return updated;
     }

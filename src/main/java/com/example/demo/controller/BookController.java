@@ -33,15 +33,11 @@ public class BookController {
     // 3️⃣ GET BOOK BY NAME (SINGLE BOOK RETURN)
     @GetMapping("/getBookByName/{title}")
     public List<Book> getBookByName(@PathVariable String title) {
-        List<Book> books = null;
-        try {
-            books = bookService.getBookByName(title);
-            System.out.println("Books found: " + books);
-        } catch (Exception e) {
-            throw new RuntimeException("Controller error while finding books: " + e.getMessage());
-        }
-        return books;
+        List<Book> book = bookService.getBookByName(title);
+        System.out.println(book);
+        return book;
     }
+
 
 
 
