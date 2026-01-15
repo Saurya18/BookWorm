@@ -9,8 +9,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
-    private Long user_id; // ❗isko bhi username field se mix mat karna, ye sirf PK example lag raha hai
+    private Long user_id;
 
     private String username;
     private String password;
@@ -18,45 +17,33 @@ public class User {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // ✅ GETTERS
-    public String getUsername() {
-        return username;
+    @PrePersist
+    public void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getPassword() {
-        return password;
+    @PreUpdate
+    public void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getEmailId() {
-        return emailId;
-    }
+    // Getters & Setters
+    public Long getUser_id() { return user_id; }
+    public void setUser_id(Long user_id) { this.user_id = user_id; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    // ✅ SETTERS
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public String getEmailId() { return emailId; }
+    public void setEmailId(String emailId) { this.emailId = emailId; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

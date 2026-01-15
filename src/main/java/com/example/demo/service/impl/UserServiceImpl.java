@@ -1,11 +1,13 @@
 package com.example.demo.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.example.demo.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
+import com.example.demo.util.JwtUtil;
+import com.example.demo.util.PasswordUtil;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -13,30 +15,27 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @Override
-    public User register(User user) {
-        try {
-            user.setCreatedAt(LocalDateTime.now());
-            user.setUpdatedAt(LocalDateTime.now());
-            return userRepository.save(user);
-        } catch (Exception e) {
-            throw new RuntimeException("User registration error: " + e.getMessage());
-        }
+    public String register(User user) {
+        user.setPassword(
+                PasswordUtil.hashPassword(user.getPassword())
+        );
+        userRepository.save(user);
+        return "User registered successfully";
     }
 
     @Override
     public String login(String username, String password) {
-        try {
-            User u = userRepository.findByUsername(username);
-            if (u == null) {
-                throw new RuntimeException("User not found");
-            }
-            if (!u.getPassword().equals(password)) {
-                throw new RuntimeException("Wrong password");
-            }
-            return "Login success for user: " + username;
-        } catch (Exception e) {
-            throw new RuntimeException("Login error: " + e.getMessage());
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!PasswordUtil.verifyPassword(password, user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
         }
+
+        return jwtUtil.generateToken(username);
     }
 }
