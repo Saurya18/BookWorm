@@ -3,69 +3,124 @@ package com.example.demo.controller;
 import com.example.demo.entity.Book;
 import com.example.demo.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/books")
+@Tag(name = "Books", description = "Book management APIs")
+@SecurityRequirement(name = "BearerAuth")
 public class BookController {
 
     @Autowired
     private BookService bookService;
 
-    // 1️⃣ GET ALL BOOKS
     @GetMapping("/getAllBooks")
-    public List<Book> getAllBooks() {
-        List<Book> booksList = bookService.getAllBooks();
-        System.out.println("All Books: " + booksList);
-        return booksList;
+    @Operation(summary = "Get all books", description = "Retrieves all books from the library")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved all books")
+    })
+    public ResponseEntity<Map<String, Object>> getAllBooks() {
+        List<Book> books = bookService.getAllBooks();
+        Map<String, Object> response = new HashMap<>();
+        response.put("books", books);
+        response.put("count", books.size());
+        return ResponseEntity.ok(response);
     }
 
-    // 2️⃣ ADD BOOK
-    @PostMapping("/addBook")
-    public Book addBook(@RequestBody Book book) {
-        Book savedBook = bookService.addBook(book);
-        System.out.println("Book Added: " + savedBook);
-        return savedBook;
+    @GetMapping
+    @Operation(summary = "Get books with pagination", description = "Retrieves books with pagination and sorting")
+    public Page<Book> getBooksPaginated(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ) {
+        return bookService.getBooksPaginated(page, size, sortBy, direction);
     }
 
-    // 3️⃣ GET BOOK BY NAME (SINGLE BOOK RETURN)
-    @GetMapping("/getBookByName/{title}")
-    public List<Book> getBookByName(@PathVariable String title) {
-        List<Book> books = null;
+    @PostMapping("/addbook")
+    @Operation(summary = "Add a new book", description = "Creates a new book in the library")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Book added successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
+    public ResponseEntity<Map<String, Object>> addBook(@RequestBody Book book) {
         try {
-            books = bookService.getBookByName(title);
-            System.out.println("Books found: " + books);
+            Book savedBook = bookService.addBook(book);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Book added successfully");
+            response.put("book", savedBook);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
-            throw new RuntimeException("Controller error while finding books: " + e.getMessage());
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
-        return books;
     }
 
-
-
-
-
-    // 4️⃣ DELETE BOOK
-    @DeleteMapping("/deleteBook/{id}")
-    public String deleteBook(@PathVariable Integer id) {
-        bookService.deleteBook(id);
-        System.out.println("Deleted Book ID: " + id);
-        return "Book deleted successfully";
+    @GetMapping("/search")
+    @Operation(summary = "Search books", description = "Searches books by title, author, or genre")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Search completed successfully")
+    })
+    public ResponseEntity<Map<String, Object>> searchBooks(@RequestParam String keyword) {
+        List<Book> books = bookService.searchBooks(keyword);
+        Map<String, Object> response = new HashMap<>();
+        response.put("books", books);
+        response.put("count", books.size());
+        response.put("keyword", keyword);
+        return ResponseEntity.ok(response);
     }
 
-    // 5️⃣ UPDATE BOOK
-    @PutMapping("/updateBook/{id}")
-    public Book updateBook(@PathVariable Integer id, @RequestBody Book book) {
-
-        // update result ko variable me store kiya
-        Book updatedBook = bookService.updateBook(id, book);
-
-        // print kiya taaki update track ho sake
-        System.out.println("Book updated for ID " + id + " : " + updatedBook);
-
-        return updatedBook;
+    @PutMapping("/update")
+    @Operation(summary = "Update a book", description = "Updates an existing book")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Book updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Book not found")
+    })
+    public ResponseEntity<Map<String, Object>> updateBook(@RequestParam Integer id, @RequestBody Book book) {
+        try {
+            Book updatedBook = bookService.updateBook(id, book);
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Book updated successfully");
+            response.put("book", updatedBook);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
+    @DeleteMapping("/delete")
+    @Operation(summary = "Delete a book", description = "Deletes a book from the library")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Book deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Book not found")
+    })
+    public ResponseEntity<Map<String, String>> deleteBook(@RequestParam Integer id) {
+        try {
+            bookService.deleteBook(id);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Book deleted successfully");
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
 }

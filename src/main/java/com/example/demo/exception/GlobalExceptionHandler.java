@@ -1,21 +1,28 @@
 package com.example.demo.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntime(RuntimeException ex) {
-        System.out.println("GlobalException - " + ex.getMessage());
-        return ResponseEntity.status(400).body("Error: " + ex.getMessage());
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException e) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", e.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleAll(Exception ex) {
-        System.out.println("GlobalException - " + ex.getMessage());
-        return ResponseEntity.status(500).body("Server Error: " + ex.getMessage());
+    public ResponseEntity<Map<String, String>> handleAll(Exception e) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", e.getMessage());
+        response.put("message", "An error occurred while processing your request");
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

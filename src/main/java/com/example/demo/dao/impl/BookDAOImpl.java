@@ -4,11 +4,10 @@ import com.example.demo.dao.BookDAO;
 import com.example.demo.entity.Book;
 import com.example.demo.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
+import org.springframework.stereotype.Component;
 import java.util.List;
 
-@Repository
+@Component
 public class BookDAOImpl implements BookDAO {
 
     @Autowired
@@ -26,26 +25,30 @@ public class BookDAOImpl implements BookDAO {
 
     @Override
     public Book getBookByName(String title) {
-        return bookRepository.findByTitle(title).stream().findFirst().orElse(null);
-    }
-
-    @Override
-    public Book updateBook(Integer id, Book book) {
-        Book existing = bookRepository.findById(id).orElse(null);
-        if(existing == null) return null;
-        existing.setTitle(book.getTitle());
-        existing.setAuthor(book.getAuthor());
-        existing.setGenre(book.getGenre());
-        existing.setIsbn(book.getIsbn());
-        existing.setPublisher(book.getPublisher());
-        existing.setPublicationYear(book.getPublicationYear());
-        existing.setPrice(book.getPrice());
-        existing.setStockQuantity(book.getStockQuantity());
-        return bookRepository.save(existing);
+        return bookRepository.findByTitle(title);
     }
 
     @Override
     public void deleteBook(Integer id) {
         bookRepository.deleteById(id);
     }
+
+
+    @Override
+    public Book updateBook(Integer id, Book book) {
+
+        Book existing = bookRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Book not found"));
+
+        existing.setTitle(book.getTitle());
+        existing.setAuthor(book.getAuthor());
+        existing.setGenre(book.getGenre());
+        existing.setPublisher(book.getPublisher());
+        existing.setPublicationYear(book.getPublicationYear());
+        existing.setPrice(book.getPrice());
+        existing.setStockQuantity(book.getStockQuantity());
+
+        return bookRepository.save(existing);
+    }
+
 }
